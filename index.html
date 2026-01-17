@@ -1,0 +1,942 @@
+<div id="sepTool" style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:#1b1b1b;">
+  <style>
+    #sepTool, #sepTool * { box-sizing: border-box; }
+    #sepTool button { -webkit-tap-highlight-color: transparent; }
+    #sepTool .sep_modal_backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.45);
+      display:none; align-items:center; justify-content:center; padding:18px; z-index:999999;
+    }
+    #sepTool .sep_modal{
+      width:min(720px, 100%);
+      background:#fff; border:1px solid #ead7d2; border-radius:18px;
+      box-shadow:0 18px 48px rgba(0,0,0,.22);
+      padding:14px;
+    }
+    #sepTool .sep_modal h3{ margin:0; font-size:14px; letter-spacing:.2px; }
+    #sepTool .sep_modal p{ margin:6px 0 10px; font-size:12.5px; color:#6b6b6b; line-height:1.35; }
+    #sepTool .sep_modal textarea{
+      width:100%; min-height:180px; border:1px solid #ead7d2; border-radius:14px;
+      padding:12px; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Courier New',monospace;
+      font-size:12px; line-height:1.35; background:#fff;
+    }
+    #sepTool .sep_modal_actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    #sepTool .sep_modal_actions button{
+      border:1px solid #ead7d2; background:#fff; color:#222; border-radius:12px;
+      padding:10px 12px; font-weight:900; cursor:pointer;
+    }
+    #sepTool .sep_modal_actions .primary{
+      border:none; background:#111; color:#fff;
+    }
+  </style>
+
+  <div style="background:#fff; border:1px solid #ead7d2; border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.06); padding:16px;">
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start; justify-content:space-between;">
+      <div style="max-width:820px;">
+        <div style="font-weight:900; font-size:18px; letter-spacing:.2px;">Special Event Pricing Tool (Beverage)</div>
+        <div style="color:#6b6b6b; font-size:13px; line-height:1.35; margin-top:6px;">
+          Build confident event quotes with workload pricing (base pricing, time, volume, labor, travel, customization) + Good/Better/Best packages.
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" id="sep_reset_top" style="border:1px solid #ead7d2; background:#fff; color:#222; border-radius:12px; padding:10px 12px; font-weight:800; cursor:pointer;">Reset</button>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1.05fr .95fr; gap:14px; margin-top:14px;" id="sep_grid">
+      <!-- LEFT: INPUTS -->
+      <div style="background:rgba(255,255,255,.95); border:1px solid #ead7d2; border-radius:18px; padding:14px;">
+        <div style="font-size:12px; letter-spacing:.8px; text-transform:uppercase; font-weight:900; margin-bottom:10px;">Inputs</div>
+
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Beverage Type</div>
+          <select id="sep_bevType" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            <option value="lemonade" selected>Lemonade</option>
+            <option value="coffee">Coffee</option>
+            <option value="tea">Tea</option>
+            <option value="mocktails">Mocktails</option>
+            <option value="refreshers">Refreshers</option>
+            <option value="other">Other</option>
+          </select>
+
+          <div id="sep_bevOther_wrap" style="display:none; margin-top:8px;">
+            <input id="sep_bevOther" type="text" placeholder="Type the beverage (ex: hot chocolate, smoothies, boba, etc.)"
+              style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+          </div>
+
+          <div id="sep_cps_hint" style="margin-top:8px; font-size:12px; color:#6b6b6b;">
+            Default cost per serving is pre-filled based on beverage type.
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Event Type</div>
+            <select id="sep_eventType" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+              <option>Birthday / Family Party</option>
+              <option>Party</option>
+              <option>Special Event</option>
+              <option>Wedding / Bridal</option>
+              <option>Corporate / Office</option>
+              <option>School / Church Event</option>
+              <option>Community Festival</option>
+              <option>Fundraiser</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Location Type</div>
+            <select id="sep_locationType" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+              <option value="private">Private (higher expectations)</option>
+              <option value="public">Public (festival/market)</option>
+              <option value="indoor">Indoor</option>
+              <option value="outdoor">Outdoor</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Guest Count (estimated)</div>
+            <input id="sep_guests" type="number" min="1" value="60" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+          </div>
+          <div>
+            <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Service Duration (hours)</div>
+            <input id="sep_hours" type="number" min="0" step="0.25" value="2" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Round-trip Travel (miles)</div>
+            <input id="sep_miles" type="number" min="0" value="10" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            <div style="margin-top:6px; font-size:12px; color:#6b6b6b;">Use round-trip miles (there + back).</div>
+          </div>
+          <div>
+            <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Event Date (optional)</div>
+            <input id="sep_date" type="date" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+          </div>
+        </div>
+
+        <div style="margin-top:14px; padding-top:14px; border-top:1px dashed rgba(234,215,210,.9);">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Service Style</div>
+              <select id="sep_style" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <option value="full">Full-Service Pop-Up Bar (staffed)</option>
+                <option value="styled">Styled Setup Only (drop-off + setup)</option>
+                <option value="diy">DIY Party Kit (pickup/delivery)</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;"># of Drink Options</div>
+              <select id="sep_drinks" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Customization Level</div>
+              <select id="sep_custom" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <option value="standard">Standard</option>
+                <option value="semi">Some custom touches</option>
+                <option value="custom">Fully custom / themed</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Servings per Guest</div>
+              <select id="sep_spg" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <option value="0.8">0.8 (not everyone drinks)</option>
+                <option value="1" selected>1.0 (1 per guest)</option>
+                <option value="1.2">1.2 (some seconds)</option>
+                <option value="1.5">1.5 (high volume crowd)</option>
+              </select>
+              <div style="margin-top:6px; font-size:12px; color:#6b6b6b;">Helps inventory + labor match reality.</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Staffing (Full-Service only)</div>
+              <select id="sep_staff" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <option value="1" selected>1 attendant</option>
+                <option value="2">2 attendants</option>
+                <option value="3">3 attendants</option>
+              </select>
+              <div style="margin-top:6px; font-size:12px; color:#6b6b6b;">Ignored for Styled/DIY.</div>
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Setup + Breakdown (hours)</div>
+              <input id="sep_setup" type="number" min="0" step="0.25" value="1.25" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD-ONS -->
+        <div style="margin-top:14px; padding-top:14px; border-top:1px dashed rgba(234,215,210,.9);">
+          <div style="font-size:12px; letter-spacing:.8px; text-transform:uppercase; font-weight:900; margin-bottom:10px;">Add-ons</div>
+          <div id="sep_addons" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+        </div>
+
+        <div style="margin-top:14px; padding-top:14px; border-top:1px dashed rgba(234,215,210,.9);">
+          <div style="font-size:12px; letter-spacing:.8px; text-transform:uppercase; font-weight:900; margin-bottom:10px;">Pricing Assumptions</div>
+
+          <div id="sep_pa_row1" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Base Labor Rate (per hour)</div>
+              <input id="sep_labor" type="number" min="0" value="45" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Profit/Overhead Buffer</div>
+              <select id="sep_buffer" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <option value="0.18">18% (lean)</option>
+                <option value="0.25" selected>25% (healthy)</option>
+                <option value="0.33">33% (premium)</option>
+                <option value="other">Other (type your own)</option>
+              </select>
+              <div id="sep_buffer_other_wrap" style="display:none; margin-top:8px;">
+                <input id="sep_buffer_other" type="number" min="0" step="0.01" placeholder="Example: 0.22 for 22%" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <div style="margin-top:6px; font-size:12px; color:#6b6b6b;">Enter as a decimal (0.22 = 22%).</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="sep_pa_row2" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Estimated Cost per Serving</div>
+              <input id="sep_cps" type="number" min="0" step="0.01" value="1.25" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Travel Rate (per mile)</div>
+              <input id="sep_trate" type="number" min="0" step="0.01" value="0.75" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            </div>
+          </div>
+
+          <div id="sep_pa_row3" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Minimum Event Fee</div>
+              <input id="sep_min" type="number" min="0" value="225" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Complexity Fee (each drink over 3)</div>
+              <input id="sep_comp" type="number" min="0" value="35" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Expectations Multiplier</div>
+              <select id="sep_expect" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+                <option value="1">Normal</option>
+                <option value="1.08">Slightly elevated</option>
+                <option value="1.15" selected>High expectations</option>
+                <option value="1.25">Premium</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Notes for Client (optional)</div>
+              <textarea id="sep_notes" placeholder="Example: Includes setup + breakdown, cups/ice, and event-day service."
+                style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2; min-height:76px;"></textarea>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;">Your Business Name (optional)</div>
+              <input id="sep_biz" type="text" placeholder="Example: Sippy Hut" style="width:100%; padding:11px 12px; border-radius:12px; border:1px solid #ead7d2;">
+              <div style="margin-top:6px; font-size:12px; color:#6b6b6b;">Used in the quote summary.</div>
+            </div>
+            <div>
+              <div style="font-size:12px; color:#3a3a3a; margin-bottom:6px;"> </div>
+              <div style="height:44px;"></div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+            <button type="button" id="sep_calc" style="border:none; background:#111; color:#fff; border-radius:12px; padding:11px 12px; font-weight:900; cursor:pointer;">Calculate Pricing</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: OUTPUT -->
+      <div style="background:rgba(255,255,255,.95); border:1px solid #ead7d2; border-radius:18px; padding:14px;">
+        <div style="font-size:12px; letter-spacing:.8px; text-transform:uppercase; font-weight:900; margin-bottom:10px;">Results</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px;" id="sep_kpi_grid">
+          <div style="border:1px solid rgba(234,215,210,.92); border-radius:14px; padding:10px;">
+            <div style="font-size:11px; color:#6b6b6b; text-transform:uppercase; letter-spacing:.8px;">Estimated servings</div>
+            <div id="sep_kpi_serv" style="font-size:18px; font-weight:900; margin-top:4px;">—</div>
+            <div id="sep_kpi_serv_mini" style="font-size:12px; color:#6b6b6b; margin-top:4px;">—</div>
+          </div>
+          <div style="border:1px solid rgba(234,215,210,.92); border-radius:14px; padding:10px;">
+            <div style="font-size:11px; color:#6b6b6b; text-transform:uppercase; letter-spacing:.8px;">Workload hours</div>
+            <div id="sep_kpi_hours" style="font-size:18px; font-weight:900; margin-top:4px;">—</div>
+            <div id="sep_kpi_hours_mini" style="font-size:12px; color:#6b6b6b; margin-top:4px;">Includes prep + admin + setup</div>
+          </div>
+          <div style="border:1px solid rgba(234,215,210,.92); border-radius:14px; padding:10px;">
+            <div style="font-size:11px; color:#6b6b6b; text-transform:uppercase; letter-spacing:.8px;">Suggested per guest</div>
+            <div id="sep_kpi_pg" style="font-size:18px; font-weight:900; margin-top:4px;">—</div>
+            <div id="sep_kpi_pg_mini" style="font-size:12px; color:#6b6b6b; margin-top:4px;">Based on your inputs</div>
+          </div>
+        </div>
+
+        <div id="sep_warn" style="display:none; margin-top:10px; border:1px solid rgba(240,140,140,.45); background:rgba(240,140,140,.10); color:#5a1f1f; padding:10px 12px; border-radius:14px; font-size:12px; line-height:1.35;"></div>
+        <div id="sep_ok" style="display:none; margin-top:10px; border:1px solid rgba(140,200,165,.55); background:rgba(140,200,165,.12); color:#18402b; padding:10px 12px; border-radius:14px; font-size:12px; line-height:1.35;"></div>
+
+        <div id="sep_pkgs" style="margin-top:10px; display:grid; gap:10px;"></div>
+
+        <div style="height:1px; background:rgba(234,215,210,.92); margin:12px 0;"></div>
+
+        <div style="font-size:12px; letter-spacing:.8px; text-transform:uppercase; font-weight:900; margin-bottom:8px;">Client-ready quote</div>
+        <div id="sep_quote" style="white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Courier New',monospace; font-size:12px; line-height:1.35; border:1px solid #ead7d2; border-radius:14px; padding:12px; background:rgba(255,255,255,.9);">
+Click “Calculate Pricing” to generate your quote.
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <button type="button" id="sep_copy_quote" style="border:1px solid rgba(205,164,118,.35); background:rgba(205,164,118,.18); color:#222; border-radius:12px; padding:11px 12px; font-weight:900; cursor:pointer;">Copy Quote</button>
+          <button type="button" id="sep_print" style="border:1px solid #ead7d2; background:#fff; color:#222; border-radius:12px; padding:11px 12px; font-weight:900; cursor:pointer;">Print</button>
+          <button type="button" id="sep_copy_break" style="border:1px solid #ead7d2; background:#fff; color:#222; border-radius:12px; padding:11px 12px; font-weight:900; cursor:pointer;">Copy Breakdown</button>
+          <button type="button" id="sep_reset" style="border:1px solid #ead7d2; background:#fff; color:#222; border-radius:12px; padding:11px 12px; font-weight:900; cursor:pointer;">Reset</button>
+        </div>
+
+        <div style="font-size:12px; letter-spacing:.8px; text-transform:uppercase; font-weight:900; margin:14px 0 8px;">Internal breakdown</div>
+        <div id="sep_breakdown" style="white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Courier New',monospace; font-size:12px; line-height:1.35; border:1px solid #ead7d2; border-radius:14px; padding:12px; background:rgba(255,255,255,.9);">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal fallback for copying -->
+  <div class="sep_modal_backdrop" id="sep_modal_backdrop" role="dialog" aria-modal="true">
+    <div class="sep_modal">
+      <h3 id="sep_modal_title">Copy</h3>
+      <p id="sep_modal_help">If your browser blocks auto-copy, tap and hold to select, then copy.</p>
+      <textarea id="sep_modal_text" readonly></textarea>
+      <div class="sep_modal_actions">
+        <button type="button" class="primary" id="sep_modal_trycopy">Try Copy Again</button>
+        <button type="button" id="sep_modal_close">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  function money(n){
+    if(!isFinite(n)) return "—";
+    try { return n.toLocaleString(undefined,{style:"currency",currency:"USD",maximumFractionDigits:0}); }
+    catch(e){ return "$" + Math.round(n); }
+  }
+  function money2(n){
+    if(!isFinite(n)) return "—";
+    try { return n.toLocaleString(undefined,{style:"currency",currency:"USD",maximumFractionDigits:2}); }
+    catch(e){ return "$" + (Math.round(n*100)/100); }
+  }
+  function roundTo5(n){ return Math.round(n/5)*5; }
+  function fmtHours(n){
+    if(!isFinite(n)) return "—";
+    var rounded = Math.round(n*2)/2;
+    if(Math.abs(rounded - Math.round(rounded)) < 1e-9) return String(Math.round(rounded));
+    return rounded.toFixed(1);
+  }
+
+  var ADDONS = [
+    { key:"customNames", label:"Custom drink names", note:"Rename drinks to match the theme.", defaultPrice:25 },
+    { key:"menuDesign", label:"Menu graphic (PDF)", note:"A clean menu graphic you can send/print.", defaultPrice:35 },
+    { key:"premiumIngredients", label:"Premium ingredients upgrade", note:"Higher-cost syrups, purees, specialty add-ins.", defaultPrice:40 },
+    { key:"themedCups", label:"Themed cups / toppers", note:"Cups, toppers, charms, themed garnish style.", defaultPrice:30 },
+    { key:"extraHour", label:"Extra hour of service", note:"Adds time on-site (best for full-service).", defaultPrice:85 },
+    { key:"brandSignage", label:"Mini signage package", note:"Simple signage (bar sign, flavor list, QR).", defaultPrice:45 },
+    { key:"attendantPlus", label:"Extra attendant (full-service)", note:"Recommended for faster lines at higher volume.", defaultPrice:95 },
+    { key:"delivery", label:"Delivery / drop-off", note:"For kits or styled setups (if not included).", defaultPrice:25 }
+  ];
+
+  // ---------- COPY (modern + fallback modal) ----------
+  function showCopyModal(title, text){
+    $("sep_modal_title").textContent = title || "Copy";
+    $("sep_modal_text").value = text || "";
+    $("sep_modal_backdrop").style.display = "flex";
+    setTimeout(function(){
+      try{
+        $("sep_modal_text").focus();
+        $("sep_modal_text").select();
+      }catch(e){}
+    }, 50);
+  }
+  function hideCopyModal(){
+    $("sep_modal_backdrop").style.display = "none";
+  }
+
+  async function copyTextSmart(text, title){
+    var t = String(text || "");
+    // Try Clipboard API first
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      try{
+        await navigator.clipboard.writeText(t);
+        return true;
+      }catch(e){
+        // fall through
+      }
+    }
+    // Fallback: execCommand
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = t;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if(ok) return true;
+    }catch(e){}
+
+    // If all fails, show modal for manual copy
+    showCopyModal(title || "Copy", t);
+    return false;
+  }
+
+  $("sep_modal_close").addEventListener("click", hideCopyModal);
+  $("sep_modal_backdrop").addEventListener("click", function(e){
+    if(e.target === $("sep_modal_backdrop")) hideCopyModal();
+  });
+  $("sep_modal_trycopy").addEventListener("click", function(){
+    copyTextSmart($("sep_modal_text").value, $("sep_modal_title").textContent);
+  });
+
+  // ---------- Beverage defaults ----------
+  function setCpsByBeverage(){
+    var bev = $("sep_bevType").value;
+    var hint = $("sep_cps_hint");
+    var cps = 1.50;
+
+    // These are conservative starter defaults (user can change anytime)
+    if(bev === "lemonade"){ cps = 1.25; hint.textContent = "Lemonade default includes base + syrup/puree + cup + ice."; }
+    if(bev === "coffee"){ cps = 1.80; hint.textContent = "Coffee default includes coffee + milk/alt + flavor + cup + ice/hot cup."; }
+    if(bev === "tea"){ cps = 1.35; hint.textContent = "Tea default includes tea base + flavor + cup + ice."; }
+    if(bev === "mocktails"){ cps = 1.70; hint.textContent = "Mocktails default includes mixers + flavor + cup + ice."; }
+    if(bev === "refreshers"){ cps = 1.55; hint.textContent = "Refreshers default includes base + fruit/flavor + cup + ice."; }
+    if(bev === "other"){ cps = 1.60; hint.textContent = "Other beverage default is a starting point — adjust to your real cost."; }
+
+    $("sep_cps").value = String(cps);
+
+    // show/hide other field
+    $("sep_bevOther_wrap").style.display = (bev === "other") ? "block" : "none";
+  }
+
+  function autoSetupByStyle(){
+    var style = $("sep_style").value;
+    if(style === "full") $("sep_setup").value = "1.25";
+    if(style === "styled") $("sep_setup").value = "1.00";
+    if(style === "diy") $("sep_setup").value = "0.50";
+  }
+
+  function customMult(level){
+    if(level === "semi") return 1.08;
+    if(level === "custom") return 1.18;
+    return 1.00;
+  }
+  function locationMult(t){
+    if(t === "private") return 1.06;
+    if(t === "outdoor") return 1.02;
+    return 1.00;
+  }
+  function speedFactor(guests, style){
+    if(style !== "full") return 1.00;
+    if(guests <= 50) return 1.00;
+    if(guests <= 100) return 1.08;
+    if(guests <= 150) return 1.15;
+    return 1.22;
+  }
+  function getBuffer(){
+    var v = $("sep_buffer").value;
+    if(v === "other"){
+      var x = parseFloat($("sep_buffer_other").value || "0.25");
+      if(!isFinite(x) || x < 0) x = 0.25;
+      return x;
+    }
+    return parseFloat(v || "0.25");
+  }
+
+  function renderAddons(){
+    var wrap = $("sep_addons");
+    if(!wrap) return;
+    wrap.innerHTML = "";
+    for(var i=0;i<ADDONS.length;i++){
+      (function(a){
+        var div = document.createElement("div");
+        div.style.border = "1px solid #ead7d2";
+        div.style.borderRadius = "14px";
+        div.style.padding = "10px";
+        div.style.background = "rgba(255,255,255,.9)";
+        div.innerHTML =
+          '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">' +
+            '<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#222;cursor:pointer;">' +
+              '<input type="checkbox" id="addon_'+a.key+'" style="transform:scale(1.05)">' +
+              '<span style="font-weight:800;">'+a.label+'</span>' +
+            '</label>' +
+            '<div style="display:flex;align-items:center;gap:8px;min-width:170px;">' +
+              '<span style="font-size:12px;color:#4a4a4a;">$</span>' +
+              '<input type="number" min="0" id="addonPrice_'+a.key+'" value="'+a.defaultPrice+'" style="width:120px; padding:9px 10px; border-radius:12px; border:1px solid #ead7d2;">' +
+            '</div>' +
+          '</div>' +
+          '<div style="margin-top:6px;font-size:12px;color:#6b6b6b;line-height:1.3;">'+a.note+'</div>';
+        wrap.appendChild(div);
+
+        $("addon_"+a.key).addEventListener("change", calculate);
+        $("addonPrice_"+a.key).addEventListener("input", calculate);
+      })(ADDONS[i]);
+    }
+  }
+
+  function getAddonTotal(){
+    var total = 0;
+    var lines = [];
+    for(var i=0;i<ADDONS.length;i++){
+      var a = ADDONS[i];
+      var chk = $("addon_"+a.key);
+      var priceEl = $("addonPrice_"+a.key);
+      if(!chk || !priceEl) continue;
+      var on = chk.checked;
+      var p = parseFloat(priceEl.value || "0");
+      if(on && p>0){
+        total += p;
+        lines.push("- " + a.label + ": " + money2(p));
+      }
+    }
+    return { total: total, lines: lines };
+  }
+
+  function calc(){
+    var style = $("sep_style").value;
+    var guests = Math.max(1, parseFloat($("sep_guests").value || "1"));
+    var hours = Math.max(0, parseFloat($("sep_hours").value || "0"));
+    var miles = Math.max(0, parseFloat($("sep_miles").value || "0"));
+    var trate = Math.max(0, parseFloat($("sep_trate").value || "0"));
+    var labor = Math.max(0, parseFloat($("sep_labor").value || "0"));
+    var buffer = getBuffer();
+    var cps = Math.max(0, parseFloat($("sep_cps").value || "0"));
+    var spg = parseFloat($("sep_spg").value || "1");
+    var drinks = parseInt($("sep_drinks").value || "3", 10);
+    var compFee = Math.max(0, parseFloat($("sep_comp").value || "0"));
+    var setupH = Math.max(0, parseFloat($("sep_setup").value || "0"));
+    var cm = customMult($("sep_custom").value);
+    var em = parseFloat($("sep_expect").value || "1");
+    var lm = locationMult($("sep_locationType").value);
+
+    var servings = Math.round(guests * spg);
+    var extra = Math.max(0, drinks - 3);
+    var complexity = extra * compFee;
+
+    var staff = (style === "full") ? parseInt($("sep_staff").value || "1",10) : 1;
+    var sf = speedFactor(guests, style);
+
+    var admin = (style === "diy") ? 0.6 : (style === "styled" ? 0.5 : 0.35);
+    var prepScaler = (style === "full") ? (guests<=50?0.6:guests<=100?0.9:guests<=150?1.2:1.5) : (guests<=60?0.5:0.8);
+    var prep = prepScaler + (extra * 0.15);
+
+    var workload = 0;
+    if(style === "full"){
+      workload = (hours + setupH) * staff * sf + prep + admin;
+    } else if(style === "styled"){
+      workload = (setupH) + (prep * 0.7) + admin;
+    } else {
+      workload = (prep * 0.85) + admin + 0.25;
+    }
+
+    var ingredientCost = servings * cps;
+    var travelFee = (miles * trate) + (miles > 30 ? 15 : 0) + (miles > 60 ? 25 : 0);
+    var laborCost = workload * labor;
+
+    var addons = getAddonTotal();
+
+    var subtotal = ingredientCost + travelFee + laborCost + complexity + addons.total;
+    subtotal = subtotal * cm * em * lm;
+    var total = subtotal * (1 + buffer);
+
+    return {
+      style:style, guests:guests, hours:hours, miles:miles, trate:trate, labor:labor, buffer:buffer,
+      cps:cps, spg:spg, drinks:drinks, servings:servings, extra:extra, compFee:compFee,
+      setupH:setupH, cm:cm, em:em, lm:lm, staff:staff, sf:sf, admin:admin, prep:prep,
+      workload:workload, ingredientCost:ingredientCost, travelFee:travelFee, laborCost:laborCost,
+      complexity:complexity, addonsTotal:addons.total, addonsLines:addons.lines,
+      subtotal:subtotal, total:total
+    };
+  }
+
+  function packages(anchored){
+    return {
+      good: roundTo5(anchored * 0.92),
+      better: roundTo5(anchored),
+      best: roundTo5(anchored * 1.18)
+    };
+  }
+
+  function writePackages(c){
+    var box = $("sep_pkgs");
+    box.innerHTML = "";
+    var minFee = Math.max(0, parseFloat($("sep_min").value || "0"));
+    var anchored = Math.max(c.total, minFee);
+    var p = packages(anchored);
+
+    var styleLabel = (c.style === "full") ? "Full-Service" : (c.style === "styled" ? "Styled Setup" : "DIY Kit");
+
+    function card(tier, price, meta){
+      var d = document.createElement("div");
+      d.style.border = "1px solid rgba(234,215,210,.92)";
+      d.style.borderRadius = "16px";
+      d.style.background = "rgba(255,255,255,.9)";
+      d.style.padding = "12px";
+      d.innerHTML =
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">' +
+          '<div>' +
+            '<div style="font-weight:900;letter-spacing:.6px;text-transform:uppercase;font-size:12px;">'+tier+'</div>' +
+            '<div style="color:#6b6b6b;font-size:12px;line-height:1.35;margin-top:6px;">'+meta+'</div>' +
+          '</div>' +
+          '<div style="font-size:18px;font-weight:900;">'+money(price)+'</div>' +
+        '</div>';
+      box.appendChild(d);
+    }
+
+    card("Good", p.good, styleLabel + " • simple coverage • fewer upgrades");
+    card("Better", p.better, styleLabel + " • most common • balanced coverage");
+    card("Best", p.best, styleLabel + " • premium polish • best cushion");
+  }
+
+  function writeKpis(c){
+    $("sep_kpi_serv").textContent = String(c.servings);
+    $("sep_kpi_serv_mini").textContent = Math.round(c.guests) + " guests × " + $("sep_spg").value + " servings/guest";
+    $("sep_kpi_hours").textContent = fmtHours(c.workload);
+    $("sep_kpi_hours_mini").textContent = "Includes prep + admin + setup";
+    var perGuest = c.total / c.guests;
+    $("sep_kpi_pg").textContent = money(perGuest);
+    $("sep_kpi_pg_mini").textContent = "Based on your inputs";
+  }
+
+  function writeWarn(c){
+    var warn = $("sep_warn");
+    var ok = $("sep_ok");
+    warn.style.display = "none";
+    ok.style.display = "none";
+    warn.innerHTML = "";
+    ok.innerHTML = "";
+
+    var issues = [];
+    var wins = [];
+    var minFee = Math.max(0, parseFloat($("sep_min").value || "0"));
+
+    if(c.total < minFee) issues.push("Calculated total ("+money(c.total)+") is below your minimum ("+money(minFee)+"). Packages anchor to the minimum.");
+    else wins.push("Pricing clears your minimum event fee ("+money(minFee)+").");
+
+    if(c.drinks >= 6) issues.push("You selected "+c.drinks+" drinks. Consider 3–5 for smoother service + stronger profit.");
+    if(c.style === "full" && c.guests > 100 && c.staff < 2) issues.push("Over 100 guests with 1 attendant. Consider adding an attendant for faster lines.");
+    if(c.miles >= 60) issues.push("Travel is long ("+Math.round(c.miles)+" miles round-trip). Consider a travel minimum.");
+
+    if(issues.length){
+      warn.style.display = "block";
+      warn.innerHTML = "<strong>Heads up:</strong><br>• " + issues.join("<br>• ");
+    }
+    if(wins.length){
+      ok.style.display = "block";
+      ok.innerHTML = "<strong>Looking good:</strong><br>• " + wins.join("<br>• ");
+    }
+  }
+
+  function beverageLabel(){
+    var bev = $("sep_bevType").value;
+    var other = ($("sep_bevOther").value || "").trim();
+    if(bev === "other" && other) return other;
+    if(bev === "lemonade") return "Lemonade";
+    if(bev === "coffee") return "Coffee";
+    if(bev === "tea") return "Tea";
+    if(bev === "mocktails") return "Mocktails";
+    if(bev === "refreshers") return "Refreshers";
+    return "Beverage";
+  }
+
+  function quoteText(c){
+    var biz = ($("sep_biz").value || "").replace(/\s+/g," ").trim();
+    var header = biz ? (biz + " — Special Event Quote") : "Special Event Quote";
+    var eventType = $("sep_eventType").value;
+    var dateVal = $("sep_date").value;
+    var dateLine = "";
+    if(dateVal){
+      try{
+        var d = new Date(dateVal + "T00:00:00");
+        dateLine = "Event Date: " + d.toLocaleDateString() + "\n";
+      }catch(e){ dateLine = ""; }
+    }
+    var styleLabel = (c.style === "full") ? "Full-Service Pop-Up Bar" : (c.style === "styled" ? "Styled Setup Only" : "DIY Party Kit");
+
+    var minFee = Math.max(0, parseFloat($("sep_min").value || "0"));
+    var anchored = Math.max(c.total, minFee);
+    var p = packages(anchored);
+
+    var included = (c.style === "diy")
+      ? "Includes planning + prep, kit assembly, and pickup/delivery as agreed."
+      : (c.style === "styled")
+        ? "Includes planning, themed setup, and a styled display as agreed."
+        : "Includes setup + breakdown, event-day service, and standard supplies (cups/ice/etc.).";
+
+    var addons = getAddonTotal();
+    var addonsText = addons.lines.length ? ("\nSelected Add-ons:\n" + addons.lines.join("\n") + "\n") : "";
+    var notes = ($("sep_notes").value || "").trim();
+    var noteBlock = notes ? ("\nNotes:\n" + notes + "\n") : "";
+
+    return (
+      header + "\n" +
+      dateLine +
+      "Beverage Type: " + beverageLabel() + "\n" +
+      "Event Type: " + eventType + "\n" +
+      "Service Style: " + styleLabel + "\n" +
+      "Guests (est.): " + Math.round(c.guests) + "\n" +
+      "Estimated servings: " + c.servings + "\n" +
+      "Menu: " + c.drinks + " drink options\n" +
+      "Travel: " + Math.round(c.miles) + " miles round-trip\n\n" +
+      "Package Options:\n" +
+      "• Good: " + money(p.good) + "\n" +
+      "• Better: " + money(p.better) + "\n" +
+      "• Best: " + money(p.best) + "\n\n" +
+      "What this covers:\n" +
+      included + "\n" +
+      "Pricing reflects prep time, inventory, travel, and customization.\n" +
+      addonsText +
+      noteBlock +
+      "To book: reply with the package you want (Good / Better / Best) + your final guest estimate."
+    ).trim();
+  }
+
+  function breakdownText(c){
+    var addons = getAddonTotal();
+    var lines = [];
+    lines.push("INTERNAL BREAKDOWN");
+    lines.push("Beverage Type: " + beverageLabel());
+    lines.push("Style: " + c.style);
+    lines.push("Guests: " + Math.round(c.guests) + " | Servings: " + c.servings + " | Drinks: " + c.drinks);
+    lines.push("Workload hours (est): " + c.workload.toFixed(2));
+    if(addons.lines.length){
+      lines.push("");
+      lines.push("ADD-ONS");
+      for(var i=0;i<addons.lines.length;i++) lines.push(addons.lines[i]);
+    }
+    lines.push("");
+    lines.push("COSTS");
+    lines.push("Ingredients: " + money2(c.ingredientCost) + " ("+c.servings+" × "+money2(c.cps)+")");
+    lines.push("Travel: " + money2(c.travelFee));
+    lines.push("Labor: " + money2(c.laborCost) + " ("+c.workload.toFixed(2)+" hrs × "+money2(c.labor)+")");
+    lines.push("Complexity: " + money2(c.complexity));
+    lines.push("Add-ons total: " + money2(addons.total));
+    lines.push("");
+    lines.push("MULTIPLIERS");
+    lines.push("Customization: " + c.cm.toFixed(2));
+    lines.push("Expectations: " + c.em.toFixed(2));
+    lines.push("Location: " + c.lm.toFixed(2));
+    lines.push("Subtotal (after multipliers): " + money2(c.subtotal));
+    lines.push("Buffer: " + (c.buffer*100).toFixed(0) + "%");
+    lines.push("TOTAL (before minimum): " + money2(c.total));
+    var minFee = Math.max(0, parseFloat($("sep_min").value || "0"));
+    lines.push("Minimum fee: " + money2(minFee) + " → anchored: " + money2(Math.max(c.total, minFee)));
+    return lines.join("\n");
+  }
+
+  function doPrint(){
+    try{
+      calculate();
+      var c = window.__sep_last_calc || calc();
+      var biz = ($("sep_biz").value || "").replace(/\s+/g," ").trim();
+      var title = biz ? (biz + " — Special Event Quote") : "Special Event Quote";
+
+      var minFee = Math.max(0, parseFloat($("sep_min").value || "0"));
+      var anchored = Math.max(c.total, minFee);
+      var p = packages(anchored);
+
+      var pkgText =
+        "Package Options\n" +
+        "Good: " + money(p.good) + "\n" +
+        "Better: " + money(p.better) + "\n" +
+        "Best: " + money(p.best) + "\n";
+
+      var quote = $("sep_quote").textContent || quoteText(c);
+      var breakdown = $("sep_breakdown").textContent || breakdownText(c);
+
+      var w = window.open("", "sepPrint", "width=850,height=900");
+      if(!w){
+        copyTextSmart(quote, "Copy Quote");
+        alert("Popup blocked. I opened the copy box instead.");
+        return;
+      }
+
+      var safe = function(s){
+        return String(s || "")
+          .replace(/&/g,"&amp;")
+          .replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;")
+          .replace(/"/g,"&quot;");
+      };
+
+      w.document.open();
+      w.document.write(
+        '<!doctype html><html><head><meta charset="utf-8"/>' +
+        '<meta name="viewport" content="width=device-width,initial-scale=1"/>' +
+        '<title>' + safe(title) + '</title>' +
+        '<style>' +
+          'body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#111;margin:28px;}' +
+          'h1{font-size:18px;margin:0 0 10px;}' +
+          '.sub{color:#555;font-size:12px;margin:0 0 18px;}' +
+          'pre{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace;font-size:12px;line-height:1.35;' +
+          'border:1px solid #ead7d2;border-radius:12px;padding:12px;background:#fff;}' +
+          '.grid{display:grid;grid-template-columns:1fr;gap:12px;}' +
+          '.label{font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:900;color:#333;margin:10px 0 6px;}' +
+          '@media print{body{margin:0.5in;} pre{border:1px solid #ddd;}}' +
+        '</style></head><body>' +
+        '<h1>' + safe(title) + '</h1>' +
+        '<div class="sub">Printed quote summary + packages + internal breakdown</div>' +
+        '<div class="grid">' +
+          '<div><div class="label">Client-ready quote</div><pre>' + safe(quote) + '</pre></div>' +
+          '<div><div class="label">Package options</div><pre>' + safe(pkgText) + '</pre></div>' +
+          '<div><div class="label">Internal breakdown</div><pre>' + safe(breakdown) + '</pre></div>' +
+        '</div>' +
+        '<script>window.onload=function(){ setTimeout(function(){ window.print(); }, 200); }<\/script>' +
+        '</body></html>'
+      );
+      w.document.close();
+      w.focus();
+    } catch(e){
+      showCopyModal("Copy Quote", $("sep_quote").textContent);
+      alert("Print failed here. Use the copy box instead.");
+    }
+  }
+
+  function calculate(){
+    $("sep_buffer_other_wrap").style.display = ($("sep_buffer").value === "other") ? "block" : "none";
+    $("sep_bevOther_wrap").style.display = ($("sep_bevType").value === "other") ? "block" : "none";
+
+    var c = calc();
+    writeKpis(c);
+    writeWarn(c);
+    writePackages(c);
+    $("sep_quote").textContent = quoteText(c);
+    $("sep_breakdown").textContent = breakdownText(c);
+    window.__sep_last_calc = c;
+  }
+
+  function resetAll(){
+    $("sep_bevType").value = "lemonade";
+    $("sep_bevOther").value = "";
+    setCpsByBeverage();
+
+    $("sep_eventType").selectedIndex = 0;
+    $("sep_locationType").value = "private";
+    $("sep_guests").value = 60;
+    $("sep_hours").value = 2;
+    $("sep_miles").value = 10;
+    $("sep_date").value = "";
+    $("sep_style").value = "full";
+    $("sep_drinks").value = "4";
+    $("sep_custom").value = "standard";
+    $("sep_spg").value = "1";
+    $("sep_staff").value = "1";
+    $("sep_setup").value = "1.25";
+    $("sep_labor").value = 45;
+    $("sep_buffer").value = "0.25";
+    $("sep_buffer_other").value = "";
+    $("sep_trate").value = 0.75;
+    $("sep_min").value = 225;
+    $("sep_comp").value = 35;
+    $("sep_expect").value = "1.15";
+    $("sep_notes").value = "";
+    $("sep_biz").value = "";
+
+    for(var i=0;i<ADDONS.length;i++){
+      var a = ADDONS[i];
+      $("addon_"+a.key).checked = false;
+      $("addonPrice_"+a.key).value = a.defaultPrice;
+    }
+
+    autoSetupByStyle();
+    calculate();
+  }
+
+  function responsiveGrid(){
+    var w = window.innerWidth || 1000;
+    var grid = $("sep_grid");
+    if(grid) grid.style.gridTemplateColumns = (w < 980) ? "1fr" : "1.05fr .95fr";
+
+    var kpi = $("sep_kpi_grid");
+    if(kpi) kpi.style.gridTemplateColumns = (w < 760) ? "1fr" : "1fr 1fr 1fr";
+
+    var addWrap = $("sep_addons");
+    if(addWrap) addWrap.style.gridTemplateColumns = (w < 760) ? "1fr" : "1fr 1fr";
+
+    var cols = (w < 760) ? "1fr" : "1fr 1fr";
+    var pa1 = $("sep_pa_row1");
+    var pa2 = $("sep_pa_row2");
+    var pa3 = $("sep_pa_row3");
+    if(pa1) pa1.style.gridTemplateColumns = cols;
+    if(pa2) pa2.style.gridTemplateColumns = cols;
+    if(pa3) pa3.style.gridTemplateColumns = cols;
+  }
+
+  // listeners
+  var ids = [
+    "sep_bevType","sep_bevOther",
+    "sep_eventType","sep_locationType","sep_guests","sep_hours","sep_miles","sep_date",
+    "sep_style","sep_drinks","sep_custom","sep_spg","sep_staff","sep_setup",
+    "sep_labor","sep_buffer","sep_buffer_other","sep_cps","sep_trate","sep_min","sep_comp","sep_expect",
+    "sep_notes","sep_biz"
+  ];
+  for(var i=0;i<ids.length;i++){
+    (function(id){
+      var el = $(id);
+      if(!el) return;
+      el.addEventListener("input", function(){
+        if(id === "sep_bevType"){ setCpsByBeverage(); }
+        calculate();
+      });
+      el.addEventListener("change", function(){
+        if(id === "sep_bevType"){ setCpsByBeverage(); }
+        calculate();
+      });
+    })(ids[i]);
+  }
+
+  $("sep_style").addEventListener("change", function(){
+    autoSetupByStyle();
+    calculate();
+  });
+
+  $("sep_calc").addEventListener("click", calculate);
+
+  $("sep_copy_quote").addEventListener("click", async function(){
+    var ok = await copyTextSmart($("sep_quote").textContent, "Copy Quote");
+    $("sep_copy_quote").textContent = ok ? "Copied!" : "Copy Quote";
+    setTimeout(function(){ $("sep_copy_quote").textContent = "Copy Quote"; }, 900);
+  });
+
+  $("sep_copy_break").addEventListener("click", async function(){
+    var ok = await copyTextSmart($("sep_breakdown").textContent, "Copy Breakdown");
+    $("sep_copy_break").textContent = ok ? "Copied!" : "Copy Breakdown";
+    setTimeout(function(){ $("sep_copy_break").textContent = "Copy Breakdown"; }, 900);
+  });
+
+  $("sep_print").addEventListener("click", doPrint);
+  $("sep_reset").addEventListener("click", resetAll);
+  $("sep_reset_top").addEventListener("click", resetAll);
+
+  window.addEventListener("resize", responsiveGrid);
+
+  // init
+  renderAddons();
+  setCpsByBeverage();
+  autoSetupByStyle();
+  responsiveGrid();
+  calculate();
+})();
+</script>
